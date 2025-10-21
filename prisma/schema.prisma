@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String  @unique
+  phone_number   String?
+  name      String?
+  name_profile   String? @unique
+  password  String?
+  avatar String?
+  last_name   String?
+   // OAuth поля
+  googleId  String? @unique
+// Відносини
+  posts           Post[]
+  refreshTokens   RefreshToken[]
+  contacts        Contacts[]
+  
+  // Чати: користувач як учасник
+  chatParticipants ChatParticipant[]
+  
+  // ✅ Зворотні відносини для чатів
+  chatsAsParticipant1 PrivateChat[] @relation("ChatParticipant1")
+  chatsAsParticipant2 PrivateChat[] @relation("ChatParticipant2")
+  
+  // Повідомлення: користувач як автор
+  messages        Message[]
+  
+  createdAt       DateTime  @default(now())
+}
+
+
+
+// Залишилась для сумісності, але не потрібна для приватних чатів
+model ChatParticipant {
+  id       Int        @id @default(autoincrement())
+  
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+  
+  joinedAt DateTime   @default(now())
+}
+
+model Message {
+  id              Int       @id @default(autoincrement())
+  
+  content         String
+  
+  // Автор повідомлення (через googleId)
+  authorGoogleId  String
+  author          User      @relation(fields: [authorGoogleId], references: [googleId], onDelete: Cascade)
+  
+  // Чат
+  chat            PrivateChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId          Int
+  
+  isRead          Boolean   @default(false)
+  readAt          DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+model PrivateChat {
+  id              Int       @id @default(autoincrement())
+  
+  participant1Id  Int
+  participant2Id  Int
+  
+  participant1    User      @relation("ChatParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2    User      @relation("ChatParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  
+  messages        Message[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@unique([participant1Id, participant2Id])
+}
+model RefreshToken {
+  id        Int     @id @default(autoincrement())
+  token     String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String
+  author    User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Contacts {
+  id        Int   @id @default(autoincrement()) // Використовуємо UUID як первинний ключ
+  name_profile String  // Це буде UUID для контакту
+  userId    String  // Це буде GoogleId користувача, унікальний для кожного користувача
+  user      User    @relation(fields: [userId], references: [googleId])  // Встановлюємо відношення з User через googleId
+}
