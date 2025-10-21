@@ -53,7 +53,7 @@ export const contactsService = {
     });
 
     // 2. Дістаємо список name_profile (googleId користувачів-контактів)
-    const profileIds = contactProfiles.map((c) => c.name_profile);
+    const profileIds = contactProfiles.map((c: any) => c.name_profile);
 
     // 3. Отримуємо дані користувачів по name_profile (googleId)
     const users = await prisma.user.findMany({
