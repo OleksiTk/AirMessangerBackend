@@ -8,20 +8,23 @@ export const chatController = {
       console.log("воно виконується");
 
       const { profileName } = req.query;
-      const userId = Number(req.userId); // ✅ Беремо з middleware, не з query
-      console.log(userId);
+      const { googleId } = req.query; // ✅ Беремо з middleware, не з query
+      console.log(googleId);
 
       // ✅ Типізуємо query параметр
       if (
         !profileName ||
         typeof profileName !== "string" ||
-        typeof userId !== "number"
+        typeof googleId !== "string"
       ) {
         return res.status(400).json({ message: "Profile name required" });
       }
       console.log("тту ми");
 
-      const chat = await chatService.getChatByProfileName(userId, profileName);
+      const chat = await chatService.getChatByProfileName(
+        googleId,
+        profileName
+      );
       res.status(200).json(chat);
     } catch (error) {
       const message =

@@ -3,12 +3,12 @@ import { prisma } from "../config/prisma";
 export const chatService = {
   // Отримати чат за name_profile користувача
   async getChatByProfileName(
-    currentUserId: number,
+    currentUserId: string,
     otherUserProfileName: string
   ) {
     // Отримуємо поточного користувача
     const currentUser = await prisma.user.findUnique({
-      where: { id: currentUserId },
+      where: { googleId: currentUserId },
       select: { id: true, name_profile: true },
     });
     console.log(currentUser);
