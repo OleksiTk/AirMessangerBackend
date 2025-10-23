@@ -2,6 +2,13 @@
 import type { Request, Response } from "express";
 import { authService } from "../services/authService.js";
 import { v4 as uuidv4 } from "uuid";
+const cookieOptions = {
+  httpOnly: true,
+  secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
+  sameSite: "none" as const, // ✅ 'none' замість 'strict'
+  path: "/",
+  // НЕ вказуйте domain для Railway
+};
 export const authController = {
   async register(req: Request, res: Response) {
     try {
@@ -19,14 +26,16 @@ export const authController = {
       );
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
+        sameSite: "none" as const, // ✅ 'none' замість 'strict'
+        path: "/",
         maxAge: 15 * 60 * 1000, // 15 хвилин
       });
       res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
+        sameSite: "none" as const, // ✅ 'none' замість 'strict'
+        path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       res.status(201).json({
@@ -53,14 +62,16 @@ export const authController = {
       const result = await authService.login(email, password);
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
+        sameSite: "none" as const, // ✅ 'none' замість 'strict'
+        path: "/",
         maxAge: 15 * 60 * 1000, // 15 хвилин
       });
       res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
+        sameSite: "none" as const, // ✅ 'none' замість 'strict'
+        path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
