@@ -8,14 +8,14 @@ const ACCESS_TOKEN_EXPIRES = "15m";
 const REFRESH_TOKEN_EXPIRES = "7d";
 
 export const tokenService = {
-  generateAccessToken(userId: number) {
-    return jwt.sign({ userId }, ACCESS_TOKEN_SECRET, {
+  generateAccessToken(userId: number, googleId: string) {
+    return jwt.sign({ userId, googleId }, ACCESS_TOKEN_SECRET, {
       expiresIn: ACCESS_TOKEN_EXPIRES,
     });
   },
 
-  generateRefreshToken(userId: number) {
-    return jwt.sign({ userId }, REFRESH_TOKEN_SECRET, {
+  generateRefreshToken(userId: number, googleId: string) {
+    return jwt.sign({ userId, googleId }, REFRESH_TOKEN_SECRET, {
       expiresIn: REFRESH_TOKEN_EXPIRES,
     });
   },

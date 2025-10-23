@@ -33,8 +33,8 @@ export const authService = {
     });
 
     // Генеруємо токени
-    const accessToken = tokenService.generateAccessToken(user.id);
-    const refreshToken = tokenService.generateRefreshToken(user.id);
+    const accessToken = tokenService.generateAccessToken(user.id, googleId);
+    const refreshToken = tokenService.generateRefreshToken(user.id, googleId);
 
     await tokenService.saveRefreshToken(user.id, refreshToken);
 
@@ -66,8 +66,14 @@ export const authService = {
     }
 
     // Генеруємо токени
-    const accessToken = tokenService.generateAccessToken(user.id);
-    const refreshToken = tokenService.generateRefreshToken(user.id);
+    const accessToken = tokenService.generateAccessToken(
+      user.id,
+      user.googleId
+    );
+    const refreshToken = tokenService.generateRefreshToken(
+      user.id,
+      user.googleId
+    );
 
     await tokenService.saveRefreshToken(user.id, refreshToken);
 
@@ -106,9 +112,9 @@ export const authService = {
     }
 
     const userId = decoded.userId;
-
+    const googleId = decoded.googleId;
     // Генеруємо новий access token
-    const newAccessToken = tokenService.generateAccessToken(userId);
+    const newAccessToken = tokenService.generateAccessToken(userId, googleId);
 
     return { accessToken: newAccessToken };
   },

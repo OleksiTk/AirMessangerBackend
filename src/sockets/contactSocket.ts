@@ -1,5 +1,4 @@
 import { Server, Socket } from "socket.io";
-import { prisma } from "../config/prisma";
 
 export const contactSocket = (io: Server) => {
   io.on("connection", (socket: Socket) => {

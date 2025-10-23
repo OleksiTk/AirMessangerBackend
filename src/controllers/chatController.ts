@@ -8,7 +8,7 @@ export const chatController = {
       console.log("воно виконується");
 
       const { profileName } = req.query;
-      const { googleId } = req.query; // ✅ Беремо з middleware, не з query
+      const googleId = req.googleId; // ✅ Беремо з middleware, не з query
       console.log(googleId);
 
       // ✅ Типізуємо query параметр
@@ -36,7 +36,7 @@ export const chatController = {
   // Отримати всі чати користувача
   async getUserChats(req: Request, res: Response) {
     try {
-      const googleId = req.userId;
+      const googleId = req.googleId;
 
       if (!googleId) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -89,7 +89,7 @@ export const chatController = {
   async sendMessage(req: Request, res: Response) {
     try {
       const { chatId, content } = req.body;
-      const googleId = req.userId;
+      const googleId = req.googleId;
 
       if (!chatId || !content) {
         return res.status(400).json({ message: "Missing required fields" });

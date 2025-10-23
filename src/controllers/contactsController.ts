@@ -4,7 +4,8 @@ import { contactsService } from "../services/contactsService";
 export const contactsController = {
   async addContacts(req: Request, res: Response) {
     try {
-      const { name_profile, userId } = req.body;
+      const { name_profile } = req.body;
+      const userId = req.googleId;
       if (!name_profile || !userId) {
         return res.status(400).json({ message: "Missing required fields" });
       }
@@ -21,7 +22,7 @@ export const contactsController = {
   },
   async getAllContacts(req: Request, res: Response) {
     try {
-      const { userId } = req.query;
+      const userId = req.googleId;
       if (!userId || typeof userId !== "string") {
         return res.status(400).json({ message: "Missing or invalid userId" });
       }

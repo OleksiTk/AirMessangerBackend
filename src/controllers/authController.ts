@@ -112,17 +112,19 @@ export const authController = {
   },
   async changeProfileInfo(req: Request, res: Response) {
     try {
-      const { avatar, name, last_name, googleId } = req.body;
-      if (!name || !last_name || !googleId) {
+      const { avatar, name, last_name } = req.body;
+      const userId = req.googleId;
+
+      if (!name || !last_name || !userId) {
         return res.status(400).json({
           message: "Missing required fields",
-          fields: googleId,
+          userId,
           last_name,
           name,
           avatar,
         });
       }
-      const userId = googleId;
+
       const updatedUser = await authService.changeProfileInfo(
         userId,
         avatar,
@@ -134,7 +136,8 @@ export const authController = {
   },
   async getContacts(req: Request, res: Response) {
     try {
-      const { name_profile, googleId } = req.query;
+      const { name_profile } = req.query;
+      const googleId = req.googleId;
       console.log(googleId, "гугл ID");
 
       if (typeof name_profile !== "string" || typeof googleId !== "string") {
@@ -153,7 +156,7 @@ export const authController = {
   },
   async getUser(req: Request, res: Response) {
     try {
-      const { googleId } = req.query;
+      const googleId = req.googleId;
       console.log(googleId, "гугл ID");
 
       if (typeof googleId !== "string") {
