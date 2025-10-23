@@ -51,8 +51,9 @@ export const authMiddleware = async (
         // Встановлюємо новий accessToken в cookies
         res.cookie("accessToken", newAccessToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
+          sameSite: "none" as const, // ✅ 'none' замість 'strict'
+          path: "/",
           maxAge: 15 * 60 * 1000, // 15 хвилин
         });
 
