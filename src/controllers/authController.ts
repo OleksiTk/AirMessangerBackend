@@ -43,6 +43,7 @@ export const authController = {
         user: result.user,
         accessToken: result.accessToken,
         googleId: googleId,
+        check: "ok",
       });
     } catch (error) {
       const message =
@@ -79,6 +80,7 @@ export const authController = {
         message: "Login successful",
         user: result.user,
         accessToken: result.accessToken,
+        check: "ok",
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Login failed";
