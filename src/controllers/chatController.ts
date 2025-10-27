@@ -99,9 +99,9 @@ export const chatController = {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const message = await chatService.createMessage(
-        parseInt(chatId, 10),
-        String(googleId),
+      const message = await chatService.sendMessage(
+        String(chatId),
+        googleId,
         content
       );
       res.status(201).json(message);

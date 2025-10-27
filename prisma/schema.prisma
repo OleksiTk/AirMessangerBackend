@@ -17,72 +17,64 @@ model User {
   avatar String?
   last_name   String?
    // OAuth поля
-  googleId  String? @unique
+  googleId  String @unique
 // Відносини
   posts           Post[]
   refreshTokens   RefreshToken[]
   contacts        Contacts[]
   
-  // Чати: користувач як учасник
-  chatParticipants ChatParticipant[]
-  
-  // ✅ Зворотні відносини для чатів
-  chatsAsParticipant1 PrivateChat[] @relation("ChatParticipant1")
-  chatsAsParticipant2 PrivateChat[] @relation("ChatParticipant2")
-  
-  // Повідомлення: користувач як автор
-  messages        Message[]
+
+
+  // Тут я зберігаю чати для користувача 
+   chats    ChatParticipant[] // Чати користувача
+  messages Message[]         // Повідомлення користувача
   
   createdAt       DateTime  @default(now())
 }
 
+model Chat {
+  id        String   @id @default(uuid())
+  name      String?  // Назва групового чату (опціонально)
+  isGroup   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants ChatParticipant[] // Учасники чату
+  messages     Message[]         // Повідомлення
+}
+
+// Зв'язок користувачів з чатами (many-to-many)
+model ChatParticipant {
+  id     Int    @id @default(autoincrement())
+  chatId String
+  userId String
+
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [googleId], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([chatId, userId]) // Один користувач не може бути двічі в одному чаті
+}
+
+// Повідомлення в чаті
+model Message {
+  id        Int      @id @default(autoincrement())
+  chatId    String
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
+  isRead    Boolean  @default(false)
+
+  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender User @relation(fields: [senderId], references: [googleId], onDelete: Cascade)
+}
 
 
 // Залишилась для сумісності, але не потрібна для приватних чатів
-model ChatParticipant {
-  id       Int        @id @default(autoincrement())
-  
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   Int
-  
-  joinedAt DateTime   @default(now())
-}
 
-model Message {
-  id              Int       @id @default(autoincrement())
-  
-  content         String
-  
-  // Автор повідомлення (через googleId)
-  authorGoogleId  String
-  author          User      @relation(fields: [authorGoogleId], references: [googleId], onDelete: Cascade)
-  
-  // Чат
-  chat            PrivateChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  chatId          Int
-  
-  isRead          Boolean   @default(false)
-  readAt          DateTime?
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-}
-model PrivateChat {
-  id              Int       @id @default(autoincrement())
-  
-  participant1Id  Int
-  participant2Id  Int
-  
-  participant1    User      @relation("ChatParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
-  participant2    User      @relation("ChatParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
-  
-  messages        Message[]
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
-  @@unique([participant1Id, participant2Id])
-}
+
+
 model RefreshToken {
   id        Int     @id @default(autoincrement())
   token     String  @unique

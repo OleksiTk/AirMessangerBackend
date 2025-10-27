@@ -27,131 +27,109 @@ export const chatService = {
       throw new Error("Contact not found");
     }
 
-    // Переконаємось, що userIds завжди в одному порядку
-    const [userId1, userId2] =
-      currentUser.id < otherUser.id
-        ? [currentUser.id, otherUser.id]
-        : [otherUser.id, currentUser.id];
-
     // Шукаємо існуючий чат
     console.log("чат десь тут");
-
-    let chat = await prisma.privateChat.findUnique({
+    const existingChat = await prisma.chat.findFirst({
       where: {
-        participant1Id_participant2Id: {
-          participant1Id: userId1,
-          participant2Id: userId2,
+        isGroup: false,
+        participants: {
+          every: {
+            userId: { in: [currentUserId, otherUser.googleId] },
+          },
         },
       },
       include: {
-        participant1: {
-          select: {
-            id: true,
-            name_profile: true,
-            avatar: true,
-            name: true,
-          },
+        participants: true,
+        messages: true,
+      },
+    });
+
+    if (existingChat && existingChat.participants.length === 2) {
+      return existingChat; // Чат вже існує
+    }
+    // let chat = await prisma.privateChat.findUnique({
+    //   where: {
+    //     participant1Id_participant2Id: {
+    //       participant1Id: userId1,
+    //       participant2Id: userId2,
+    //     },
+    //   },
+    //   include: {
+    //     participant1: {
+    //       select: {
+    //         id: true,
+    //         name_profile: true,
+    //         avatar: true,
+    //         name: true,
+    //       },
+    //     },
+    //     participant2: {
+    //       select: {
+    //         id: true,
+    //         name_profile: true,
+    //         avatar: true,
+    //         name: true,
+    //       },
+    //     },
+    //     messages: {
+    //       orderBy: { createdAt: "asc" },
+    //       take: 50,
+    //       include: {
+    //         author: {
+    //           select: {
+    //             id: true,
+    //             name_profile: true,
+    //             avatar: true,
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
+    const chat = await prisma.chat.create({
+      data: {
+        isGroup: false,
+        participants: {
+          create: [{ userId: currentUserId }, { userId: otherUser.googleId }],
         },
-        participant2: {
-          select: {
-            id: true,
-            name_profile: true,
-            avatar: true,
-            name: true,
-          },
-        },
-        messages: {
-          orderBy: { createdAt: "asc" },
-          take: 50,
+      },
+      include: {
+        participants: {
           include: {
-            author: {
-              select: {
-                id: true,
-                name_profile: true,
-                avatar: true,
-              },
-            },
+            user: true,
           },
         },
       },
     });
-
-    // Якщо чату немає - створюємо
-    if (!chat) {
-      console.log("ЧАТА НЕМВА");
-
-      chat = await prisma.privateChat.create({
-        data: {
-          participant1Id: userId1,
-          participant2Id: userId2,
-        },
-        include: {
-          participant1: {
-            select: {
-              id: true,
-              name_profile: true,
-              avatar: true,
-              name: true,
-            },
-          },
-          participant2: {
-            select: {
-              id: true,
-              name_profile: true,
-              avatar: true,
-              name: true,
-            },
-          },
-          messages: true,
-        },
-      });
-    }
 
     return chat;
   },
 
   // Отримати всі чати користувача
   async getUserChats(googleId: string) {
-    const user = await prisma.user.findUnique({
-      where: { googleId },
-      select: { id: true },
-    });
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    const chats = await prisma.privateChat.findMany({
+    const chats = await prisma.chat.findMany({
       where: {
-        OR: [{ participant1Id: user.id }, { participant2Id: user.id }],
-      },
-      include: {
-        participant1: {
-          select: {
-            id: true,
-            name_profile: true,
-            avatar: true,
-            name: true,
+        participants: {
+          some: {
+            userId: googleId,
           },
         },
-        participant2: {
-          select: {
-            id: true,
-            name_profile: true,
-            avatar: true,
-            name: true,
+      },
+      include: {
+        participants: {
+          include: {
+            user: {
+              select: {
+                googleId: true,
+                name: true,
+                avatar: true,
+              },
+            },
           },
         },
         messages: {
           orderBy: { createdAt: "desc" },
-          take: 1,
-          include: {
-            author: {
-              select: {
-                name_profile: true,
-              },
-            },
-          },
+          take: 1, // Останнє повідомлення
         },
       },
       orderBy: {
@@ -183,24 +161,22 @@ export const chatService = {
   },
 
   // Створити повідомлення
-  async createMessage(chatId: number, authorGoogleId: string, content: string) {
-    return await prisma.message.create({
+  async sendMessage(chatId: string, senderId: string, content: string) {
+    const message = await prisma.message.create({
       data: {
         chatId,
-        authorGoogleId,
+        senderId,
         content,
       },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name_profile: true,
-            avatar: true,
-            googleId: true,
-          },
-        },
-      },
     });
+
+    // Оновлюємо час останньої активності чату
+    await prisma.chat.update({
+      where: { id: chatId },
+      data: { updatedAt: new Date() },
+    });
+
+    return message;
   },
 
   // Позначити повідомлення як прочитане

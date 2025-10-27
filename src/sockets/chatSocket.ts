@@ -65,19 +65,9 @@ export const chatSocketHandler = (io: Server) => {
           // Зберігаємо повідомлення в БД
           const message = await prisma.message.create({
             data: {
-              content,
               chatId,
-              authorGoogleId: googleId,
-            },
-            include: {
-              author: {
-                select: {
-                  id: true,
-                  name_profile: true,
-                  avatar: true,
-                  googleId: true,
-                },
-              },
+              senderId: googleId,
+              content,
             },
           });
 
@@ -87,10 +77,11 @@ export const chatSocketHandler = (io: Server) => {
           io.to(`chat_${chatId}`).emit("receive_message", {
             id: message.id,
             content: message.content,
-            author: message.author,
-            authorGoogleId: message.authorGoogleId,
-            createdAt: message.createdAt,
-            isRead: message.isRead,
+            senderId: googleId,
+            // author: message.author,
+            // authorGoogleId: message.authorGoogleId,
+            // createdAt: message.createdAt,
+            // isRead: message.isRead,
           });
         } catch (error) {
           console.error("Error saving message:", error);
@@ -152,7 +143,19 @@ export const chatSocketHandler = (io: Server) => {
         console.log(`👋 ${name_profile} left chat ${chatId}`);
       }
     );
+    // додає контакт
+    socket.on("add_contacts", async (data) => {
+      console.log(data);
 
+      // Тут ти робиш якусь обробку даних або додаєш контакт в базу
+      // Наприклад, збереження контакту в базу (prisma)
+
+      // Після цього надсилаєш broadcast всім клієнтам, окрім того, хто надіслав запит
+      io.emit("contacts_new_add", {
+        message: "New contact added",
+        contact: data, // Відправляємо дані контакту
+      });
+    });
     // ✅ Відключення
     socket.on("disconnect", () => {
       const user = connectedUsers.get(socket.id);
