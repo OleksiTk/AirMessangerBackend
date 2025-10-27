@@ -27,14 +27,14 @@ export const authController = {
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "none" as const, // ✅ 'none' замість 'strict'
+        sameSite: "strict", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 15 * 60 * 1000, // 15 хвилин
       });
       res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "none" as const, // ✅ 'none' замість 'strict'
+        sameSite: "strict", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
@@ -42,6 +42,7 @@ export const authController = {
         message: "User registered successfully",
         user: result.user,
         accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
         googleId: googleId,
         check: "ok",
       });
@@ -64,14 +65,14 @@ export const authController = {
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "none" as const, // ✅ 'none' замість 'strict'
+        sameSite: "strict", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 15 * 60 * 1000, // 15 хвилин
       });
       res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "none" as const, // ✅ 'none' замість 'strict'
+        sameSite: "strict", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });

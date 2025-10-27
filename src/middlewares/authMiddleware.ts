@@ -52,7 +52,7 @@ export const authMiddleware = async (
         res.cookie("accessToken", newAccessToken, {
           httpOnly: true,
           secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-          sameSite: "none" as const, // ✅ 'none' замість 'strict'
+          sameSite: "strict", // ✅ 'none' замість 'strict'
           path: "/",
           maxAge: 15 * 60 * 1000, // 15 хвилин
         });
