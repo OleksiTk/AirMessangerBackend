@@ -25,16 +25,18 @@ export const authController = {
         googleId
       );
       res.cookie("accessToken", result.accessToken, {
+        domain: ".up.railway.app",
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "strict", // ✅ 'none' замість 'strict'
+        sameSite: "none", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 15 * 60 * 1000, // 15 хвилин
       });
       res.cookie("refreshToken", result.refreshToken, {
+        domain: ".up.railway.app",
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "strict", // ✅ 'none' замість 'strict'
+        sameSite: "none", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
@@ -63,16 +65,18 @@ export const authController = {
 
       const result = await authService.login(email, password);
       res.cookie("accessToken", result.accessToken, {
+        domain: ".up.railway.app",
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "strict", // ✅ 'none' замість 'strict'
+        sameSite: "none", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 15 * 60 * 1000, // 15 хвилин
       });
       res.cookie("refreshToken", result.refreshToken, {
+        domain: ".up.railway.app",
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "strict", // ✅ 'none' замість 'strict'
+        sameSite: "none", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
