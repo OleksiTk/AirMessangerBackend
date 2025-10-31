@@ -12,6 +12,7 @@ import userRoutes from "./routes/users.routes.js";
 import { chatSocketHandler } from "./sockets/chatSocket.js";
 import { contactSocket } from "./sockets/contactSocket.js";
 import chatRoutes from "./routes/chat.routes.js";
+
 // import userRoutes from './routes/users.routes';
 // import postRoutes from './routes/posts.routes';
 const __filename = fileURLToPath(import.meta.url);
@@ -30,7 +31,8 @@ app.use(
 );
 app.use(express.json());
 // app.use("/create", userRouter);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());

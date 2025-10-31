@@ -65,7 +65,10 @@ model Message {
   content   String
   createdAt DateTime @default(now())
   isRead    Boolean  @default(false)
-
+   fileUrl   String?  // URL файлу (/uploads/filename.jpg)
+  fileName  String?  // Оригінальна назва файлу
+  fileType  String?  // MIME type (image/png, application/pdf)
+  fileSize  Int?     // Розмір в байтах
   chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
   sender User @relation(fields: [senderId], references: [googleId], onDelete: Cascade)
 }

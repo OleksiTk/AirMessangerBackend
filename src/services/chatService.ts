@@ -36,10 +36,18 @@ export const chatService = {
           every: {
             userId: { in: [currentUserId, otherUser.googleId] },
           },
+          // Перевірка, що є рівно 2 учасники
+          some: {
+            userId: currentUserId,
+          },
         },
       },
       include: {
-        participants: true,
+        participants: {
+          include: {
+            user: { select: { name: true, last_name: true } }, // Додайте це, щоб отримати дані користувача
+          },
+        },
         messages: true,
       },
     });

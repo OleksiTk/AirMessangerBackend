@@ -1,6 +1,10 @@
 // src/sockets/chatSocket.ts
 import { Server, Socket } from "socket.io";
 import { prisma } from "../config/prisma";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+const upload = multer({ dest: "uploads/" });
 
 interface ConnectedUser {
   socketId: string;
@@ -52,37 +56,73 @@ export const chatSocketHandler = (io: Server) => {
     // ✅ Отримання повідомлення
     socket.on(
       "send_message",
-      async (data: { chatId: number; content: string; googleId: string }) => {
+      async (data: {
+        chatId: number;
+        content: string;
+        googleId: string;
+        file?: {
+          fileUrl: string;
+          fileName: string;
+          fileType: string;
+          fileSize: number;
+        };
+      }) => {
         try {
-          const { chatId, content, googleId } = data;
-          console.log(data);
+          const { chatId, content, googleId, file } = data;
+          console.log("інфа з сайта", data);
+          console.log("file", file);
 
           if (!content.trim()) {
             socket.emit("error", { message: "Message cannot be empty" });
             return;
           }
-
-          // Зберігаємо повідомлення в БД
-          const message = await prisma.message.create({
-            data: {
-              chatId,
+          if (file) {
+            const message = await prisma.message.create({
+              data: {
+                chatId,
+                senderId: googleId,
+                content: content || "",
+                fileUrl: file?.fileUrl || null,
+                fileName: file?.fileName || null,
+                fileType: file?.fileType || null,
+                fileSize: file?.fileSize || null,
+              },
+            });
+            io.to(`chat_${chatId}`).emit("receive_message", {
+              id: message.id,
+              content: message.content,
               senderId: googleId,
-              content,
-            },
-          });
+              fileUrl: message.fileUrl,
+              fileName: message.fileName,
+              fileType: message.fileType,
+              // author: message.author,
+              // authorGoogleId: message.authorGoogleId,
+              // createdAt: message.createdAt,
+              // isRead: message.isRead,
+            });
+          } else {
+            const message = await prisma.message.create({
+              data: {
+                chatId,
+                senderId: googleId,
+                content,
+              },
+            });
+            io.to(`chat_${chatId}`).emit("receive_message", {
+              id: message.id,
+              content: message.content,
+              senderId: googleId,
+              // author: message.author,
+              // authorGoogleId: message.authorGoogleId,
+              // createdAt: message.createdAt,
+              // isRead: message.isRead,
+            });
+          }
+          // Зберігаємо повідомлення в БД
 
           console.log(`📨 Message saved to chat ${chatId}`);
 
           // ✅ Відправляємо всім в чаті
-          io.to(`chat_${chatId}`).emit("receive_message", {
-            id: message.id,
-            content: message.content,
-            senderId: googleId,
-            // author: message.author,
-            // authorGoogleId: message.authorGoogleId,
-            // createdAt: message.createdAt,
-            // isRead: message.isRead,
-          });
         } catch (error) {
           console.error("Error saving message:", error);
           socket.emit("error", { message: "Failed to send message" });
