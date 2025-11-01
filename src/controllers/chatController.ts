@@ -60,6 +60,92 @@ export const chatController = {
       res.status(500).json({ error: "File upload failed" });
     }
   },
+  async createGroups(req: Request, res: Response) {
+    try {
+      let { avatar, name_groups } = req.body;
+      let googleId = req.googleId;
+      if (!googleId) {
+        return res.status(400).json({ message: "dont have id" });
+      }
+      const createGroups = await chatService.creatGroups(
+        avatar,
+        name_groups,
+        googleId
+      );
+      if (createGroups) {
+        return res.json({
+          check: "ok",
+        });
+      }
+    } catch (error) {
+      res.status(400).json({ message: "Something went wrong" });
+    }
+  },
+  async addToGroups(req: Request, res: Response) {
+    try {
+      let { name_profile } = req.body;
+      let googleId = req.googleId;
+      if (!googleId) {
+        return res.status(400).json({ message: "dont have id" });
+      }
+      const createGroups = await chatService.addToGroupsContacts(
+        name_profile,
+        googleId
+      );
+      if (createGroups) {
+        return res.json({
+          check: "ok",
+        });
+      }
+    } catch (error) {
+      res.status(400).json({ message: "Something went wrong" });
+    }
+  },
+  async getGroups(req: Request, res: Response) {
+    try {
+      let googleId = req.googleId;
+      if (!googleId) {
+        return res.status(400).json({ message: "dont have id" });
+      }
+      const getGroups = await chatService.getGroups(googleId);
+      if (getGroups) {
+        return res.json({
+          getGroups,
+          check: "ok",
+        });
+      }
+    } catch (error) {
+      res.status(400).json({ message: "Something went wrong" });
+    }
+  },
+  async getGroupsChats(req: Request, res: Response) {
+    try {
+      console.log("воно виконується");
+
+      const { groupName } = req.params;
+      console.log(groupName);
+
+      const googleId = req.googleId; // ✅ Беремо з middleware, не з query
+      console.log(googleId);
+
+      // ✅ Типізуємо query параметр
+      if (
+        !groupName ||
+        typeof groupName !== "string" ||
+        typeof googleId !== "string"
+      ) {
+        return res.status(400).json({ message: "Profile name required" });
+      }
+      console.log("тту ми");
+
+      const chat = await chatService.getGroupsChats(groupName, googleId);
+      res.status(200).json(chat);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to get chat";
+      res.status(400).json({ message });
+    }
+  },
   // Отримати всі чати користувача
   async getUserChats(req: Request, res: Response) {
     try {

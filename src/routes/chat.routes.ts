@@ -44,6 +44,20 @@ router.post(
   upload.single("file"),
   chatController.upLoadFile
 );
+router.post("/create-groups", authMiddleware, chatController.createGroups);
+router.post("/add-to-groups", authMiddleware, chatController.addToGroups);
+router.get("/get-groups", authMiddleware, chatController.getGroups);
+router.get(
+  "/GroupsName/:groupName",
+  authMiddleware,
+  chatController.getGroupsChats
+);
+router.post(
+  "/GroupsName/:groupName",
+  authMiddleware,
+  upload.single("file"),
+  chatController.upLoadFile
+);
 // ✅ Специфічні роути ПЕРЕД параметризованими
 router.get("/my-chats", authMiddleware, chatController.getUserChats);
 router.get("/:chatId/messages", authMiddleware, chatController.getChatMessages);
