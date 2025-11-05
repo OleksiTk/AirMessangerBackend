@@ -28,7 +28,7 @@ export const authController = {
         // domain: ".up.railway.app",
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "none", // ✅ 'none' замість 'strict'
+        sameSite: "lax", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 15 * 60 * 1000, // 15 хвилин
       });
@@ -36,7 +36,7 @@ export const authController = {
         // domain: ".up.railway.app",
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "none", // ✅ 'none' замість 'strict'
+        sameSite: "lax", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
@@ -68,7 +68,7 @@ export const authController = {
         // domain: ".up.railway.app",
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "none", // ✅ 'none' замість 'strict'
+        sameSite: "lax", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 15 * 60 * 1000, // 15 хвилин
       });
@@ -76,7 +76,7 @@ export const authController = {
         // domain: ".up.railway.app",
         httpOnly: true,
         secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-        sameSite: "none", // ✅ 'none' замість 'strict'
+        sameSite: "lax", // ✅ 'none' замість 'strict'
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });

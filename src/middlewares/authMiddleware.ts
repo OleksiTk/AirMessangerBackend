@@ -53,7 +53,7 @@ export const authMiddleware = async (
           // domain: ".up.railway.app",
           httpOnly: true,
           secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-          sameSite: "none", // ✅ 'none' замість 'strict'
+          sameSite: "lax", // ✅ 'none' замість 'strict'
           path: "/",
           maxAge: 15 * 60 * 1000, // 15 хвилин
         });
@@ -106,7 +106,7 @@ export const authMiddleware = async (
           // domain: ".up.railway.app",
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "none",
+          sameSite: "lax",
           maxAge: 15 * 60 * 1000,
         });
         req.googleId = decoded.googleId;

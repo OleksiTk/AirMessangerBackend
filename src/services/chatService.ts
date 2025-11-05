@@ -266,6 +266,7 @@ export const chatService = {
           chat: true, // Включаємо дані чату
         },
       });
+
       console.log("his name profile", name_profile);
 
       const findUserFromName = await prisma.user.findUnique({
@@ -313,7 +314,11 @@ export const chatService = {
           chat: true, // Включаємо дані чату
         },
       });
-
+      if (!result) {
+        return {
+          message: "Dont have groups",
+        };
+      }
       return {
         success: true,
         result,

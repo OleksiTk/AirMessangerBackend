@@ -1,10 +1,8 @@
 // src/sockets/chatSocket.ts
 import { Server, Socket } from "socket.io";
 import { prisma } from "../config/prisma";
-import multer from "multer";
 import path from "path";
 import fs from "fs";
-const upload = multer({ dest: "uploads/" });
 
 interface ConnectedUser {
   socketId: string;
@@ -39,7 +37,7 @@ export const chatSocketHandler = (io: Server) => {
           // Приєднуємо до room чату
           socket.join(`chat_${chatId}`);
 
-          console.log(`👤 ${name_profile} joined chat ${chatId}`);
+          console.log(` ${name_profile} joined chat ${chatId}`);
 
           // Повідомляємо інших, що користувач приєднався
           io.to(`chat_${chatId}`).emit("user_joined", {
