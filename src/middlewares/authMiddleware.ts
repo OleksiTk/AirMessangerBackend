@@ -50,10 +50,10 @@ export const authMiddleware = async (
 
         // Встановлюємо новий accessToken в cookies
         res.cookie("accessToken", newAccessToken, {
-          // domain: ".up.railway.app",
+          domain: ".up.railway.app",
           httpOnly: true,
           secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
-          sameSite: "lax", // ✅ 'none' замість 'strict'
+          sameSite: "none", // ✅ 'none' замість 'strict'
           path: "/",
           maxAge: 15 * 60 * 1000, // 15 хвилин
         });
@@ -103,10 +103,10 @@ export const authMiddleware = async (
         );
 
         res.cookie("accessToken", newAccessToken, {
-          // domain: ".up.railway.app",
+          domain: ".up.railway.app",
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
+          sameSite: "none",
           maxAge: 15 * 60 * 1000,
         });
         req.googleId = decoded.googleId;
