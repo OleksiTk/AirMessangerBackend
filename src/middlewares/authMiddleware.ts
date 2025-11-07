@@ -50,7 +50,7 @@ export const authMiddleware = async (
 
         // Встановлюємо новий accessToken в cookies
         res.cookie("accessToken", newAccessToken, {
-          domain: ".up.railway.app",
+          // domain: ".up.railway.app",
           httpOnly: true,
           secure: true, // ОБОВ'ЯЗКОВО true для SameSite=none
           sameSite: "none", // ✅ 'none' замість 'strict'
@@ -103,7 +103,7 @@ export const authMiddleware = async (
         );
 
         res.cookie("accessToken", newAccessToken, {
-          domain: ".up.railway.app",
+          // domain: ".up.railway.app",
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "none",
