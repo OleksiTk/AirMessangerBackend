@@ -41,7 +41,7 @@ router.get("/", authMiddleware, chatController.getChatByProfileName);
 router.post(
   "/",
   authMiddleware,
-  upload.single("file"),
+  upload.array("array"),
   chatController.upLoadFile
 );
 router.post("/create-groups", authMiddleware, chatController.createGroups);
@@ -55,7 +55,7 @@ router.get(
 router.post(
   "/GroupsName/:groupName",
   authMiddleware,
-  upload.single("file"),
+  upload.array("file"),
   chatController.upLoadFile
 );
 // ✅ Специфічні роути ПЕРЕД параметризованими

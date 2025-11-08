@@ -34,27 +34,25 @@ export const chatController = {
   },
   async upLoadFile(req: Request, res: Response) {
     try {
-      if (!req.file) {
+      if (!req.files || (Array.isArray(req.files) && req.files.length === 0)) {
         return res.status(400).json({ error: "No file uploaded" });
       }
 
-      const file = req.file;
+      const files = req.files as Express.Multer.File[];
+      const GetFilesInArray = files.map((file) => {
+        const relativePath = file.path.replace(/\\/g, "/"); // для Windows
+        const fileUrl = `/uploads/${relativePath.split("uploads/")[1]}`;
 
+        // Відповідь клієнту — метадані
+        return {
+          fileUrl, // URL для доступу (наприклад, /uploads/images/123.jpg)
+          fileName: file.originalname, // оригінальне ім’я
+          fileType: file.mimetype, // тип MIME
+          fileSize: file.size, // розмір у байтах
+        };
+      });
+      res.json(GetFilesInArray);
       // Формуємо URL для клієнта
-      const relativePath = file.path.replace(/\\/g, "/"); // для Windows
-      const fileUrl = `/uploads/${relativePath.split("uploads/")[1]}`;
-
-      // Відповідь клієнту — метадані
-      const fileMeta = {
-        fileUrl, // URL для доступу (наприклад, /uploads/images/123.jpg)
-        fileName: file.originalname, // оригінальне ім’я
-        fileType: file.mimetype, // тип MIME
-        fileSize: file.size, // розмір у байтах
-      };
-
-      console.log("✅ File uploaded:", fileMeta);
-
-      res.json(fileMeta);
     } catch (err) {
       console.error("❌ File upload error:", err);
       res.status(500).json({ error: "File upload failed" });

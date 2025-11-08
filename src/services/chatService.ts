@@ -48,7 +48,11 @@ export const chatService = {
             user: { select: { name: true, last_name: true, avatar: true } }, // Додайте це, щоб отримати дані користувача
           },
         },
-        messages: true,
+        messages: {
+          include: {
+            files: true,
+          },
+        },
       },
     });
 
@@ -135,7 +139,11 @@ export const chatService = {
       include: {
         chat: {
           include: {
-            messages: true, // ← Додали повідомлення
+            messages: {
+              include: {
+                files: true,
+              },
+            },
             participants: {
               include: {
                 user: { select: { name: true, last_name: true, avatar: true } }, // Додайте це, щоб отримати дані користувача
@@ -145,6 +153,7 @@ export const chatService = {
         },
       },
     });
+
     return takeChats;
   },
   // Отримати всі чати користувача

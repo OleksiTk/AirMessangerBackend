@@ -58,45 +58,48 @@ export const chatSocketHandler = (io: Server) => {
         chatId: number;
         content: string;
         googleId: string;
-        file?: {
+        files?: Array<{
+          // ✅ Виправив типізацію
           fileUrl: string;
           fileName: string;
           fileType: string;
           fileSize: number;
-        };
+        }>;
       }) => {
         try {
-          const { chatId, content, googleId, file } = data;
+          const { chatId, content, googleId, files } = data;
           console.log("інфа з сайта", data);
-          console.log("file", file);
-
+          console.log("file", files);
+          console.log(files && files.length > 0, "ось ця умова");
+          console.log(files, "files");
           if (!content.trim()) {
             socket.emit("error", { message: "Message cannot be empty" });
             return;
           }
-          if (file) {
+          if (files) {
             const message = await prisma.message.create({
               data: {
                 chatId,
                 senderId: googleId,
                 content: content || "",
-                fileUrl: file?.fileUrl || null,
-                fileName: file?.fileName || null,
-                fileType: file?.fileType || null,
-                fileSize: file?.fileSize || null,
+                files: {
+                  create: files.map((f) => ({
+                    fileUrl: f.fileUrl,
+                    fileName: f.fileName,
+                    fileType: f.fileType,
+                    fileSize: f.fileSize,
+                  })),
+                },
+              },
+              include: {
+                files: true, // ✅ Включаємо files у відповідь
               },
             });
             io.to(`chat_${chatId}`).emit("receive_message", {
               id: message.id,
               content: message.content,
               senderId: googleId,
-              fileUrl: message.fileUrl,
-              fileName: message.fileName,
-              fileType: message.fileType,
-              // author: message.author,
-              // authorGoogleId: message.authorGoogleId,
-              // createdAt: message.createdAt,
-              // isRead: message.isRead,
+              files: message.files,
             });
           } else {
             const message = await prisma.message.create({
@@ -110,10 +113,6 @@ export const chatSocketHandler = (io: Server) => {
               id: message.id,
               content: message.content,
               senderId: googleId,
-              // author: message.author,
-              // authorGoogleId: message.authorGoogleId,
-              // createdAt: message.createdAt,
-              // isRead: message.isRead,
             });
           }
           // Зберігаємо повідомлення в БД
