@@ -58,8 +58,8 @@ export const chatSocketHandler = (io: Server) => {
         chatId: number;
         content: string;
         googleId: string;
+        tempId?: string;
         files?: Array<{
-          // ✅ Виправив типізацію
           fileUrl: string;
           fileName: string;
           fileType: string;
@@ -67,7 +67,7 @@ export const chatSocketHandler = (io: Server) => {
         }>;
       }) => {
         try {
-          const { chatId, content, googleId, files } = data;
+          const { chatId, content, googleId, files, tempId } = data;
           console.log("інфа з сайта", data);
           console.log("file", files);
           console.log(files && files.length > 0, "ось ця умова");
@@ -82,6 +82,7 @@ export const chatSocketHandler = (io: Server) => {
                 chatId,
                 senderId: googleId,
                 content: content || "",
+                tempId,
                 files: {
                   create: files.map((f) => ({
                     fileUrl: f.fileUrl,
@@ -100,6 +101,7 @@ export const chatSocketHandler = (io: Server) => {
               content: message.content,
               senderId: googleId,
               files: message.files,
+              tempId,
             });
           } else {
             const message = await prisma.message.create({
@@ -107,12 +109,14 @@ export const chatSocketHandler = (io: Server) => {
                 chatId,
                 senderId: googleId,
                 content,
+                tempId,
               },
             });
             io.to(`chat_${chatId}`).emit("receive_message", {
               id: message.id,
               content: message.content,
               senderId: googleId,
+              tempId,
             });
           }
           // Зберігаємо повідомлення в БД

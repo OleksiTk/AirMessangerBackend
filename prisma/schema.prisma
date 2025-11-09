@@ -66,6 +66,8 @@ model Message {
   content   String
   createdAt DateTime @default(now())
   isRead    Boolean  @default(false)
+  isLoading  Boolean? @default(false)
+  tempId    String? 
   chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
   sender User @relation(fields: [senderId], references: [googleId], onDelete: Cascade)
   files  Files[]
