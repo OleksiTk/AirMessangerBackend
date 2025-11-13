@@ -3,6 +3,7 @@ import { Server, Socket } from "socket.io";
 import { prisma } from "../config/prisma";
 import path from "path";
 import fs from "fs";
+import { connect } from "http2";
 
 interface ConnectedUser {
   socketId: string;
@@ -140,61 +141,25 @@ export const chatSocketHandler = (io: Server) => {
         messageId: number;
       }) => {
         try {
-          const { messageId, emojiName, emojiUrl, googleId } = data;
+          const { chatId, messageId, emojiName, emojiUrl, googleId } = data;
+          console.log(chatId, "chatId");
 
-          // 1. Спочатку знаходимо або створюємо емодзі
-
-          // Якщо емодзі не існує - створюємо
-
-          // 2. Перевіряємо чи користувач вже ставив цю емодзі
-          // const existingReaction = await prisma.messageEmoji.findUnique({
-          //   where: {
-          //     messageId_emojiId_userId: {
-          //       messageId: messageId,
-          //       userId: googleId,
-          //     },
-          //   },
-          // });
-
-          // Якщо емодзі немає - додаємо
-          const messageEmoji = await prisma.messageEmoji.create({
+          const messageEmoji = await prisma.emoji.create({
             data: {
               messageId: messageId,
-              emojiId: messageId,
-              userId: googleId,
-            },
-            include: {
-              emoji: true,
-              sender: {
-                select: {
-                  name: true,
-                  avatar: true,
-                },
-              },
+              name: emojiName,
+              imgUrl: emojiUrl,
             },
           });
           console.log(messageEmoji, "create");
-
-          // Відправляємо всім учасникам чату
-          const message = await prisma.message.findUnique({
-            where: { id: messageId },
-            select: { chatId: true },
+          io.to(`chat_${chatId}`).emit("emoji_added", {
+            messageId,
+            emoji: {
+              id: emojiName,
+              emojiName: emojiName,
+              emojiUrl: emojiUrl,
+            },
           });
-
-          // io.to(message.chatId).emit("emoji_added", {
-          //   messageId,
-          //   emoji: {
-          //     id: emoji.id,
-          //     name: emoji.name,
-          //     imgUrl: emoji.imgUrl,
-          //   },
-          //   user: {
-          //     id: googleId,
-          //     name: messageEmoji.sender.name,
-          //     avatar: messageEmoji.sender.avatar,
-          //   },
-          //   createdAt: messageEmoji.createdAt,
-          // });
 
           console.log("Emoji added:", { messageId, emojiName, googleId });
           // }

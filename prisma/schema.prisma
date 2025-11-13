@@ -60,31 +60,32 @@ model Message {
   files     Files[]
   chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
   sender    User     @relation(fields: [senderId], references: [googleId], onDelete: Cascade)
-  messageEmojis MessageEmoji[]
-}
+  emojis    Emoji[]
+  }
 model Emoji {
   id        Int      @id @default(autoincrement())
+  messageId Int
   name      String   
   imgUrl    String?  
   
-  // Many-to-Many через проміжну таблицю
-  messageEmojis MessageEmoji[]
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
 }
-model MessageEmoji {
-  id        Int      @id @default(autoincrement())
-  messageId Int
-  emojiId   Int
-  userId    String   // хто поставив емодзі
-  createdAt DateTime @default(now())
+// model MessageEmoji {
+//   id        Int      @id @default(autoincrement())
+//   messageId Int
+//   emojiId   Int
+//   userId    String   // хто поставив емодзі
+//   createdAt DateTime @default(now())
   
-  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  emoji     Emoji    @relation(fields: [emojiId], references: [id], onDelete: Cascade)
+//   message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+//   emoji     Emoji    @relation(fields: [emojiId], references: [id], onDelete: Cascade)
   
-  // Один користувач може поставити одну емодзі на повідомлення тільки раз
-  @@unique([messageId, emojiId, userId])
-  @@index([messageId])
-  @@index([emojiId])
-}
+//   // Один користувач може поставити одну емодзі на повідомлення тільки раз
+//   @@unique([messageId, emojiId, userId])
+//   @@index([messageId])
+//   @@index([emojiId])
+// }
 model Files {
   id        Int     @id @default(autoincrement())
   messageId Int
