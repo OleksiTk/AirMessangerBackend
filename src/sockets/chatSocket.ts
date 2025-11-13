@@ -130,7 +130,80 @@ export const chatSocketHandler = (io: Server) => {
         }
       }
     );
+    socket.on(
+      "send_emoji",
+      async (data: {
+        chatId: number;
+        emojiName: string;
+        emojiUrl: string;
+        googleId: string;
+        messageId: number;
+      }) => {
+        try {
+          const { messageId, emojiName, emojiUrl, googleId } = data;
 
+          // 1. Спочатку знаходимо або створюємо емодзі
+
+          // Якщо емодзі не існує - створюємо
+
+          // 2. Перевіряємо чи користувач вже ставив цю емодзі
+          // const existingReaction = await prisma.messageEmoji.findUnique({
+          //   where: {
+          //     messageId_emojiId_userId: {
+          //       messageId: messageId,
+          //       userId: googleId,
+          //     },
+          //   },
+          // });
+
+          // Якщо емодзі немає - додаємо
+          const messageEmoji = await prisma.messageEmoji.create({
+            data: {
+              messageId: messageId,
+              emojiId: messageId,
+              userId: googleId,
+            },
+            include: {
+              emoji: true,
+              sender: {
+                select: {
+                  name: true,
+                  avatar: true,
+                },
+              },
+            },
+          });
+          console.log(messageEmoji, "create");
+
+          // Відправляємо всім учасникам чату
+          const message = await prisma.message.findUnique({
+            where: { id: messageId },
+            select: { chatId: true },
+          });
+
+          // io.to(message.chatId).emit("emoji_added", {
+          //   messageId,
+          //   emoji: {
+          //     id: emoji.id,
+          //     name: emoji.name,
+          //     imgUrl: emoji.imgUrl,
+          //   },
+          //   user: {
+          //     id: googleId,
+          //     name: messageEmoji.sender.name,
+          //     avatar: messageEmoji.sender.avatar,
+          //   },
+          //   createdAt: messageEmoji.createdAt,
+          // });
+
+          console.log("Emoji added:", { messageId, emojiName, googleId });
+          // }
+        } catch (error) {
+          console.error("Error sending emoji:", error);
+          socket.emit("error", { message: "Failed to send emoji" });
+        }
+      }
+    );
     // ✅ Користувач друкує
     socket.on(
       "typing",

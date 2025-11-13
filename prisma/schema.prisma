@@ -8,107 +8,115 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String  @unique
-  phone_number   String?
-  name      String?
-  name_profile   String? @unique
-  password  String?
-  avatar String?
-  last_name   String?
-   // OAuth поля
-  googleId  String @unique
-// Відносини
-  posts           Post[]
-  refreshTokens   RefreshToken[]
-  contacts        Contacts[]
-  
-
-
-  // Тут я зберігаю чати для користувача 
-   chats    ChatParticipant[] // Чати користувача
-  messages Message[]         // Повідомлення користувача
-  
-  createdAt       DateTime  @default(now())
+  id            Int               @id @default(autoincrement())
+  email         String            @unique
+  phone_number  String?
+  name          String?
+  name_profile  String?           @unique
+  password      String?
+  avatar        String?
+  last_name     String?
+  googleId      String            @unique
+  createdAt     DateTime          @default(now())
+  chats         ChatParticipant[]
+  contacts      Contacts[]
+  messages      Message[]
+  posts         Post[]
+  refreshTokens RefreshToken[]
 }
 
 model Chat {
-  id        String   @id @default(uuid())
-  name      String?  @unique // Назва групового чату (опціонально)
-  avatar String? 
-  isGroup   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String            @id @default(uuid())
+  name          String?           @unique
+  isGroup       Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  avatar        String?
   createrGroups String?
-  participants ChatParticipant[] // Учасники чату
-  messages     Message[]         // Повідомлення
+  participants  ChatParticipant[]
+  messages      Message[]
 }
 
-// Зв'язок користувачів з чатами (many-to-many)
 model ChatParticipant {
-  id     Int    @id @default(autoincrement())
-  chatId String
-  userId String
-
-  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [googleId], onDelete: Cascade)
-
+  id       Int      @id @default(autoincrement())
+  userId   String
   joinedAt DateTime @default(now())
+  chatId   String
+  chat     Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [googleId], onDelete: Cascade)
 
-  @@unique([chatId, userId]) // Один користувач не може бути двічі в одному чаті
+  @@unique([chatId, userId])
 }
 
-// Повідомлення в чаті
 model Message {
   id        Int      @id @default(autoincrement())
-  chatId    String
-  senderId  String
   content   String
-  createdAt DateTime @default(now())
+  chatId    String
   isRead    Boolean  @default(false)
-  isLoading  Boolean? @default(false)
-  tempId    String? 
-  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  sender User @relation(fields: [senderId], references: [googleId], onDelete: Cascade)
-  files  Files[]
+  createdAt DateTime @default(now())
+  senderId  String
+  isLoading Boolean? @default(false)
+  tempId    String?
+  files     Files[]
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [googleId], onDelete: Cascade)
+  messageEmojis MessageEmoji[]
 }
-model Files {
+model Emoji {
+  id        Int      @id @default(autoincrement())
+  name      String   
+  imgUrl    String?  
+  
+  // Many-to-Many через проміжну таблицю
+  messageEmojis MessageEmoji[]
+}
+model MessageEmoji {
   id        Int      @id @default(autoincrement())
   messageId Int
-  fileUrl   String?  // URL файлу (/uploads/filename.jpg)
-  fileName  String?  // Оригінальна назва файлу
-  fileType  String?   // MIME type (image/png, application/pdf)
-  fileSize  Int?      // Розмір в байтах
+  emojiId   Int
+  userId    String   // хто поставив емодзі
+  createdAt DateTime @default(now())
+  
   message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  emoji     Emoji    @relation(fields: [emojiId], references: [id], onDelete: Cascade)
+  
+  // Один користувач може поставити одну емодзі на повідомлення тільки раз
+  @@unique([messageId, emojiId, userId])
+  @@index([messageId])
+  @@index([emojiId])
+}
+model Files {
+  id        Int     @id @default(autoincrement())
+  messageId Int
+  fileUrl   String?
+  fileName  String?
+  fileType  String?
+  fileSize  Int?
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 }
 
-// Залишилась для сумісності, але не потрібна для приватних чатів
-
-
-
 model RefreshToken {
-  id        Int     @id @default(autoincrement())
-  token     String  @unique
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
   userId    Int
   expiresAt DateTime
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Post {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   title     String
   content   String
-  author    User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
+
 model Contacts {
-  id        Int   @id @default(autoincrement()) // Використовуємо UUID як первинний ключ
-
-  name_profile String  // Це буде UUID для контакту
-  userId    String  // Це буде GoogleId користувача, унікальний для кожного користувача
-  user      User    @relation(fields: [userId], references: [googleId])  // Встановлюємо відношення з User через googleId
-
+  id           Int    @id @default(autoincrement())
+  name_profile String
+  userId       String
+  user         User   @relation(fields: [userId], references: [googleId])
 }
