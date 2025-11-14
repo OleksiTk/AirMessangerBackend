@@ -51,6 +51,7 @@ export const chatService = {
         messages: {
           include: {
             files: true,
+            emojis: true,
           },
         },
       },
@@ -142,6 +143,7 @@ export const chatService = {
             messages: {
               include: {
                 files: true,
+                emojis: true,
               },
             },
             participants: {

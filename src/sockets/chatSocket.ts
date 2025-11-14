@@ -156,8 +156,8 @@ export const chatSocketHandler = (io: Server) => {
             messageId,
             emoji: {
               id: emojiName,
-              emojiName: emojiName,
-              emojiUrl: emojiUrl,
+              name: emojiName,
+              imgUrl: emojiUrl,
             },
           });
 
