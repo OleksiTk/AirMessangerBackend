@@ -45,7 +45,14 @@ export const chatService = {
       include: {
         participants: {
           include: {
-            user: { select: { name: true, last_name: true, avatar: true } }, // Додайте це, щоб отримати дані користувача
+            user: {
+              select: {
+                name: true,
+                last_name: true,
+                avatar: true,
+                name_profile: true,
+              },
+            }, // Додайте це, щоб отримати дані користувача
           },
         },
         messages: {
