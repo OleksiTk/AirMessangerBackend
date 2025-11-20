@@ -20,6 +20,7 @@ export const contactsController = {
       res.status(401).json({ message });
     }
   },
+
   async getAllContacts(req: Request, res: Response) {
     try {
       const userId = req.googleId;
@@ -35,6 +36,33 @@ export const contactsController = {
       const message =
         error instanceof Error ? error.message : "Faild search Contacts";
       res.status(401).json({ message });
+    }
+  },
+  async getAllGroups(req: Request, res: Response) {
+    try {
+      const { nameGroups } = req.body;
+      const userId = req.googleId;
+
+      console.log("nameGroups:", nameGroups);
+      console.log("userId:", userId);
+      console.log("req.body:", req.body);
+
+      if (!userId || !nameGroups) {
+        return res.status(400).json({
+          message: "Missing or invalid userId",
+          debug: { userId, nameGroups }, // Додайте для дебагу
+        });
+      }
+
+      const getGroups = await contactsService.getGroups(nameGroups);
+      res.status(201).json({
+        message: "getGroups",
+        data: getGroups,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? "Groups not found" : "Failed search Contacts";
+      res.status(500).json({ message }); // Змініть на 500, бо 401 - це проблема авторизації
     }
   },
 };

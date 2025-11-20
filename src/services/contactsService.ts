@@ -67,10 +67,30 @@ export const contactsService = {
         name: true,
         avatar: true,
         name_profile: true,
+        isOnline: true,
       },
     });
 
     return users;
   },
   deletContacts() {},
+  async getGroups(nameGroups: string) {
+    const contactProfiles = await prisma.chat.findMany({
+      where: {
+        name: {
+          contains: nameGroups,
+          mode: "insensitive", // Регістронезалежний пошук
+        },
+        isGroup: true,
+      },
+      select: { name: true, avatar: true, id: true },
+    });
+
+    // 2. Дістаємо список name_profile (googleId користувачів-контактів)
+
+    if (!contactProfiles || contactProfiles.length === 0) {
+      return "No groups found";
+    }
+    return contactProfiles;
+  },
 };

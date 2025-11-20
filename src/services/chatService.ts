@@ -51,6 +51,7 @@ export const chatService = {
                 last_name: true,
                 avatar: true,
                 name_profile: true,
+                isOnline: true,
               },
             }, // Додайте це, щоб отримати дані користувача
           },
@@ -183,6 +184,7 @@ export const chatService = {
                 googleId: true,
                 name: true,
                 avatar: true,
+                isOnline: true,
               },
             },
           },
@@ -308,6 +310,53 @@ export const chatService = {
       return {
         success: true,
         chatId: result.chat.id,
+        message: "Group created successfully",
+      };
+    } catch (error) {
+      console.error("Помилка при створенні групи:", error);
+      throw error;
+    }
+  },
+  async joinToGroups(name_groups: string, googleId: string) {
+    try {
+      // Перевірка, чи існує користувач
+      const userExists = await prisma.user.findUnique({
+        where: { googleId: googleId },
+      });
+
+      if (!userExists) {
+        throw new Error(`User with googleId ${googleId} not found`);
+      }
+
+      const resultSearchGroups = await prisma.chatParticipant.findFirst({
+        where: {
+          chat: {
+            name: name_groups,
+            isGroup: true, // Тільки групові чати
+          },
+        },
+        orderBy: {
+          joinedAt: "desc", // Останній чат зверху
+        },
+        include: {
+          chat: true, // Включаємо дані чату
+        },
+      });
+
+      const addToParticipiant = await prisma.chatParticipant.create({
+        data: {
+          chatId: resultSearchGroups.chatId,
+          userId: googleId,
+        },
+      });
+      console.log(
+        "Чат створено успішно:",
+        resultSearchGroups,
+        addToParticipiant
+      );
+      return {
+        success: true,
+        chatId: resultSearchGroups.chat.id,
         message: "Group created successfully",
       };
     } catch (error) {

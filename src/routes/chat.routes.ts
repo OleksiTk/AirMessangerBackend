@@ -46,6 +46,7 @@ router.post(
 );
 router.post("/create-groups", authMiddleware, chatController.createGroups);
 router.post("/add-to-groups", authMiddleware, chatController.addToGroups);
+router.post("/join-to-groups", authMiddleware, chatController.joinToGroups);
 router.get("/get-groups", authMiddleware, chatController.getGroups);
 router.get(
   "/GroupsName/:groupName",

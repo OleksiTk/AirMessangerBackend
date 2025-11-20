@@ -18,6 +18,7 @@ model User {
   last_name     String?
   googleId      String            @unique
   createdAt     DateTime          @default(now())
+  isOnline      Boolean           @default(false)
   chats         ChatParticipant[]
   contacts      Contacts[]
   messages      Message[]

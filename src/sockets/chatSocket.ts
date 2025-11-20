@@ -16,6 +16,51 @@ const connectedUsers = new Map<string, ConnectedUser>();
 export const chatSocketHandler = (io: Server) => {
   io.on("connection", (socket: Socket) => {
     console.log(`✅ User connected: ${socket.id}`);
+    const userId = socket.handshake.auth.userId;
+    console.log("User ID from auth:", userId);
+
+    async function UserChekingOnline(userId: string) {
+      const setIsOnline = await prisma.user.update({
+        where: { googleId: userId },
+        data: {
+          isOnline: true,
+        },
+      });
+      const userContacts = await prisma.contacts.findMany({
+        where: { userId: userId },
+        select: { name_profile: true },
+      });
+      const usersWhoHaveThisContact = await prisma.contacts.findMany({
+        where: { name_profile: userId },
+        select: { userId: true },
+      });
+
+      // Повідомити контакти про онлайн статус
+      usersWhoHaveThisContact.forEach((contact) => {
+        io.to(contact.userId).emit("user:online", {
+          userId: userId,
+          isOnline: true,
+        });
+        socket.on("get:contacts:status", async () => {
+          const contactsStatus = await prisma.user.findMany({
+            where: {
+              name_profile: {
+                in: userContacts.map((c: any) => c.name_profile),
+              },
+            },
+            select: {
+              googleId: true,
+              isOnline: true,
+              lastSeen: true,
+              name_profile: true,
+            },
+          });
+
+          socket.emit("contacts:status", contactsStatus);
+        });
+      });
+    }
+    UserChekingOnline(userId);
 
     // ✅ Користувач приєднується до чату
     socket.on(
@@ -236,8 +281,14 @@ export const chatSocketHandler = (io: Server) => {
       });
     });
     // ✅ Відключення
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       const user = connectedUsers.get(socket.id);
+      await prisma.user.update({
+        where: { googleId: userId },
+        data: {
+          isOnline: false,
+        },
+      });
       if (user) {
         console.log(`❌ ${user.name_profile} disconnected`);
         connectedUsers.delete(socket.id);

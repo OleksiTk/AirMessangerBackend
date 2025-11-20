@@ -99,6 +99,26 @@ export const chatController = {
       res.status(400).json({ message: "Something went wrong" });
     }
   },
+  async joinToGroups(req: Request, res: Response) {
+    try {
+      let { name_groups } = req.body;
+      let googleId = req.googleId;
+      if (!googleId) {
+        return res.status(400).json({ message: "dont have id" });
+      }
+      const createGroups = await chatService.joinToGroups(
+        name_groups,
+        googleId
+      );
+      if (createGroups) {
+        return res.json({
+          check: "ok",
+        });
+      }
+    } catch (error) {
+      res.status(400).json({ message: "Something went wrong" });
+    }
+  },
   async getGroups(req: Request, res: Response) {
     try {
       let googleId = req.googleId;
