@@ -36,7 +36,7 @@ export const chatSocketHandler = (io: Server) => {
       });
 
       // Повідомити контакти про онлайн статус
-      usersWhoHaveThisContact.forEach((contact) => {
+      usersWhoHaveThisContact.forEach((contact: any) => {
         io.to(contact.userId).emit("user:online", {
           userId: userId,
           isOnline: true,
